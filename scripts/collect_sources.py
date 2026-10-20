@@ -67,7 +67,7 @@ except Exception as exc:
 # Reddit public listing endpoints expose post scores and comment counts where accessible.
 for subreddit in ("LocalLLaMA", "MachineLearning", "ChatGPT", "artificial"):
     try:
-        endpoint = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=20"
+        endpoint = f"https://www.reddit.com/r/{subreddit}/top.json?t=day&limit=20"
         data = json.loads(get(endpoint))
         for entry in data.get("data", {}).get("children", []):
             post = entry.get("data", {})
@@ -102,7 +102,8 @@ rss_queries = [
 ]
 for source, query in rss_queries:
     try:
-        url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": query, "hl": "ko", "gl": "KR", "ceid": "KR:ko"})
+        lang, region, edition = ("en-US", "US", "US:en") if source.startswith("Google News EN") else ("ko", "KR", "KR:ko")
+        url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": query, "hl": lang, "gl": region, "ceid": edition})
         root = ET.fromstring(get(url))
         for entry in root.findall(".//item")[:12]:
             add({"source": source, "kind": "news", "title": entry.findtext("title", ""),
